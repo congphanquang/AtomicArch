@@ -311,13 +311,18 @@ AtomicArchTests/
 │   │   ├── ListUserGitHubViewModelTests.swift
 │   │   └── UserDetailViewModelTests.swift
 │   ├── UseCase/
+│   │   └── UserUseCaseImplTests.swift
 │   └── Repository/
+│       └── UserRepositoryImplTests.swift
 ├── Helpers/
-│   └── TestData.swift
+│   ├── TestData.swift
+│   └── XCTest+Async.swift
 └── Mocks/
     ├── UserUseCaseMock.swift
     └── UserRepositoryMock.swift
 ```
+
+A test plan is provided: `AtomicBTestPlan.xctestplan`.
 
 ### 3. Testing Principles
 - **Isolation**: Each test is independent with proper mocking
@@ -365,18 +370,24 @@ The project uses GitHub Actions for continuous integration:
    ```bash
    git clone https://github.com/phanquangcong/AtomicArch.git
    cd AtomicArch
-   xcodebuild -resolvePackageDependencies
+   xcodebuild -resolvePackageDependencies -project AtomicArch.xcodeproj
    ```
 
 3. **Running the App**
    ```bash
-   xcodebuild -scheme AtomicArch -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5' build
+   xcodebuild -scheme AtomicArch -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' build
    ```
+   Or open the project in Xcode, choose the **AtomicArch** scheme and an iOS 18.5+ simulator, then Run (⌘R).
 
 4. **Running Tests**
    ```bash
-   xcodebuild test -scheme AtomicArch -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5'
+   ruby Scripts/run-tests.rb
    ```
+   The script picks an available simulator (booted first, else first iPhone). Or run directly:
+   ```bash
+   xcodebuild test -scheme AtomicArch -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest'
+   ```
+   In Xcode you can use the test plan `AtomicBTestPlan.xctestplan` or run tests with ⌘U.
 
 ## 🧹 Linting & Formatting
 
@@ -437,8 +448,8 @@ swiftformat .
 # Lint
 swiftlint lint --config .swiftlint.yaml
 
-# Tests
-xcodebuild test -scheme AtomicArch -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5'
+# Tests (uses first available simulator)
+ruby Scripts/run-tests.rb
 ```
 
 ### 4) Create a PR

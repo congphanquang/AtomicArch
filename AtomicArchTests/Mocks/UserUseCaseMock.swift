@@ -1,5 +1,5 @@
 
-@testable import Atomic_B
+@testable import AtomicArch
 
 class UserUseCaseMock: UserUseCase {
   init() {}

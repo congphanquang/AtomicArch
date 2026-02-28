@@ -1,10 +1,10 @@
-@testable import Atomic_B
+@testable import AtomicArch
 import Networking
 import XCTest
 
 final class MockNetworkService: NetworkService {
   var requestHandler: ((Target) async throws -> Any)?
-  func request<T>(_ target: Target) async throws -> T where T: Decodable {
+  func request<T: Decodable>(_ target: Target) async throws -> T {
     if let handler = requestHandler {
       let result = try await handler(target)
       guard let typed = result as? T else {
@@ -26,17 +26,41 @@ final class UserRepositoryImplTests: XCTestCase {
     self.repository = UserRepositoryImpl(networkService: self.networkService)
   }
 
+  override func tearDown() {
+    self.networkService = nil
+    self.repository = nil
+    super.tearDown()
+  }
+
   func test_getListUser_success() async throws {
     // Arrange
-    let expected = [UserEntity(id: UUID(), login: "test", avatarUrl: "url", htmlUrl: "html")]
-    let userResponses = expected.map { UserResponse(id: 1, login: $0.login, avatarUrl: $0.avatarUrl, htmlUrl: $0.htmlUrl) }
+    let userResponses = [UserResponse(id: 1, login: "test", avatarUrl: "url", htmlUrl: "html")]
     self.networkService.requestHandler = { _ in userResponses }
 
     // Act
     let users = try await repository.getListUser(perPage: 10, since: 0)
 
     // Assert
-    XCTAssertEqual(users, expected)
+    XCTAssertEqual(users.count, 1)
+    XCTAssertEqual(users[0].login, "test")
+    XCTAssertEqual(users[0].avatarUrl, "url")
+    XCTAssertEqual(users[0].htmlUrl, "html")
+  }
+
+  func test_getListUser_passesCorrectPathToEndpoint() async throws {
+    // Arrange
+    let userResponses = [UserResponse(id: 1, login: "test", avatarUrl: "url", htmlUrl: "html")]
+    var capturedTarget: Target?
+    self.networkService.requestHandler = { target in
+      capturedTarget = target
+      return userResponses
+    }
+
+    // Act
+    _ = try await self.repository.getListUser(perPage: 20, since: 100)
+
+    // Assert
+    XCTAssertEqual(capturedTarget?.path, "/users")
   }
 
   func test_getListUser_failure() async {
@@ -55,8 +79,8 @@ final class UserRepositoryImplTests: XCTestCase {
     let userDetailResponse = UserDetailResponse(
       id: 1,
       login: expected.login,
-      avatarUrl: expected.avatarUrl, // <-- add this
-      htmlUrl: expected.htmlUrl, // <-- add this
+      avatarUrl: expected.avatarUrl,
+      htmlUrl: expected.htmlUrl,
       name: expected.name,
       company: expected.company,
       blog: expected.blog,
@@ -75,6 +99,25 @@ final class UserRepositoryImplTests: XCTestCase {
 
     // Assert
     XCTAssertEqual(detail, expected)
+  }
+
+  func test_getUser_passesUsernameToEndpoint() async throws {
+    // Arrange
+    let json = """
+    {"id":1,"login":"octocat","avatar_url":"a","html_url":"b","name":"Octo"}
+    """
+    let response = try JSONDecoder().decode(UserDetailResponse.self, from: XCTUnwrap(json.data(using: .utf8)))
+    var capturedTarget: Target?
+    self.networkService.requestHandler = { target in
+      capturedTarget = target
+      return response
+    }
+
+    // Act
+    _ = try await self.repository.getUser(with: "octocat")
+
+    // Assert
+    XCTAssertEqual(capturedTarget?.path, "/users/octocat")
   }
 
   func test_getUser_failure() async {

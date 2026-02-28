@@ -1,4 +1,4 @@
-@testable import Atomic_B
+@testable import AtomicArch
 import Foundation
 
 // Helper for generating test data for tests

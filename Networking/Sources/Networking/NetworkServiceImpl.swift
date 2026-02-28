@@ -2,7 +2,7 @@ import Foundation
 import OSLog
 
 public final class NetworkServiceImpl {
-  public struct Configuation {
+  public struct Configuration {
     public let baseURL: URL
     public let timeoutInterval: TimeInterval
     public let defaultHeaders: [String: String]
@@ -14,13 +14,13 @@ public final class NetworkServiceImpl {
     }
   }
 
-  public let configuration: Configuation
+  public let configuration: Configuration
   public let session: NetworkSessionProtocol
   public let interceptorChain: NetworkInterceptorChain
   public let networkMonitor: NetworkMonitoring
 
   public init(
-    configuration: Configuation,
+    configuration: Configuration,
     session: NetworkSessionProtocol,
     interceptorChain: NetworkInterceptorChain,
     networkMonitor: NetworkMonitoring

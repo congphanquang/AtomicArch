@@ -13,11 +13,11 @@ struct AppConfig {
   }()
 
   init() {
-    let logginNetworkIntercetor = LoggingInterceptor(
+    let loggingNetworkInterceptor = LoggingInterceptor(
       logger: logger
     )
-    let interceptorChain = NetworkInterceptorChain(interceptors: [logginNetworkIntercetor])
-    let configuration = NetworkServiceImpl.Configuation(
+    let interceptorChain = NetworkInterceptorChain(interceptors: [loggingNetworkInterceptor])
+    let configuration = NetworkServiceImpl.Configuration(
       baseURL: Environment.baseURL,
       defaultHeaders: ["Content-Type": "application/json"]
     )

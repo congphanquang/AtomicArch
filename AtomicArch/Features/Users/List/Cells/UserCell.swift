@@ -94,7 +94,7 @@ final class UserCell: UITableViewCell {
             }
           }
         } catch {
-          print("Error loading avatar: \(error)")
+          // Silently ignore avatar load failures
         }
       }
     }

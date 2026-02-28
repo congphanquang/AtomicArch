@@ -1,5 +1,5 @@
 
-@testable import Atomic_B
+@testable import AtomicArch
 import Foundation
 
 class UserRepositoryMock: UserRepository {
