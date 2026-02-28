@@ -53,11 +53,9 @@ jobs:
 
       - name: Build and test
         run: |
-          xcodebuild clean test \
-            -project AtomicArch.xcodeproj \
-            -scheme ${{ env.SCHEME }} \
-            -destination 'platform=${{ env.PLATFORM }} Simulator,name=iPhone 16 Pro,OS=latest' \
-            -enableCodeCoverage YES | xcpretty
+          chmod +x Scripts/run-tests.rb
+          xcodebuild clean build -project AtomicArch.xcodeproj -scheme ${{ env.SCHEME }} -destination 'platform=${{ env.PLATFORM }} Simulator,name=iPhone 16 Pro,OS=latest' | xcpretty
+          ruby Scripts/run-tests.rb ${{ env.SCHEME }} AtomicArch.xcodeproj | xcpretty
       
       - name: Upload Test Results
         if: always()

@@ -1,4 +1,4 @@
-@testable import Atomic_B
+@testable import AtomicArch
 import Combine
 import Networking
 import XCTest
@@ -125,8 +125,9 @@ final class ListUserGitHubViewModelTests: XCTestCase {
     // Act: Load more with the last user
     await self.sut.loadUsers(since: 2)
 
-    // Assert: user2 should not be duplicated
-    XCTAssertNotEqual(self.sut.users[1].login, "user3")
+    // Assert: user2 should not be duplicated; we should have 3 unique users
+    XCTAssertEqual(self.sut.users.count, 3)
+    XCTAssertEqual(self.sut.users.map(\.login), ["user1", "user2", "user3"])
   }
 
   func test_loadUsers_retryAfterFailure() async {

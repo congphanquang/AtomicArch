@@ -7,6 +7,6 @@ struct UserEntity: Identifiable, Equatable {
   let htmlUrl: String
 
   static func == (lhs: UserEntity, rhs: UserEntity) -> Bool {
-    lhs.login == rhs.login
+    lhs.id == rhs.id && lhs.login == rhs.login
   }
 }

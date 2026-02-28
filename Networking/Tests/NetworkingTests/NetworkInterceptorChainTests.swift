@@ -27,9 +27,9 @@ final class NetworkInterceptorChainTests: XCTestCase {
 
   // MARK: - Request Interception Tests
 
-  func test_interceptRequest_callsAllInterceptorsInOrder() {
+  func test_interceptRequest_callsAllInterceptorsInOrder() throws {
     // given
-    var request = URLRequest(url: URL(string: "https://example.com")!)
+    var request = try URLRequest(url: XCTUnwrap(URL(string: "https://example.com")))
 
     // when
     self.sut.interceptRequest(&request)
@@ -40,9 +40,9 @@ final class NetworkInterceptorChainTests: XCTestCase {
     }
   }
 
-  func test_interceptRequest_passesModifiedRequestToNextInterceptor() {
+  func test_interceptRequest_passesModifiedRequestToNextInterceptor() throws {
     // given
-    var request = URLRequest(url: URL(string: "https://example.com")!)
+    var request = try URLRequest(url: XCTUnwrap(URL(string: "https://example.com")))
     request.addValue("test", forHTTPHeaderField: "Custom")
 
     // when
@@ -54,9 +54,9 @@ final class NetworkInterceptorChainTests: XCTestCase {
 
   // MARK: - Response Interception Tests
 
-  func test_interceptResponse_callsAllInterceptorsInOrder() {
+  func test_interceptResponse_callsAllInterceptorsInOrder() throws {
     // given
-    let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
+    let response = try HTTPURLResponse(url: XCTUnwrap(URL(string: "https://example.com")), statusCode: 200, httpVersion: nil, headerFields: nil)
     let data = "test".data(using: .utf8)
 
     // when

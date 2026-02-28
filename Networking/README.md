@@ -48,7 +48,7 @@ struct MyEndpoint: Target {
 ```swift
 import Networking
 
-let config = NetworkService.Configuation(
+let config = NetworkServiceImpl.Configuration(
     baseURL: URL(string: "https://api.example.com")!,
     timeoutInterval: 30,
     defaultHeaders: ["Content-Type": "application/json"]

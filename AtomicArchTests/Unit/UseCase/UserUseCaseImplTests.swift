@@ -1,4 +1,4 @@
-@testable import Atomic_B
+@testable import AtomicArch
 import Networking
 import XCTest
 
@@ -10,6 +10,12 @@ final class UserUseCaseImplTests: XCTestCase {
     super.setUp()
     self.repository = UserRepositoryMock()
     self.useCase = UserUseCaseImpl(repository: self.repository)
+  }
+
+  override func tearDown() {
+    self.repository = nil
+    self.useCase = nil
+    super.tearDown()
   }
 
   func test_getListUser_success() async throws {

@@ -1,4 +1,4 @@
-@testable import Atomic_B
+@testable import AtomicArch
 import Combine
 @testable import Networking
 import XCTest

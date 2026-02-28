@@ -390,10 +390,7 @@ final class UserDetailViewController: UIViewController, View {
   }
 
   @objc private func backButtonTapped() {
-    print("DEBUG: Back button tapped")
-    print("DEBUG: Delegate is nil? \(self.delegate == nil)")
     self.delegate?.userDetailViewControllerDidFinish(self)
-    print("DEBUG: After delegate call")
   }
 
   private func handleViewState(_ state: ViewModelType.ViewState) {
@@ -457,7 +454,7 @@ final class UserDetailViewController: UIViewController, View {
             }
           }
         } catch {
-          print("Error loading avatar: \(error)")
+          // Silently ignore avatar load failures
         }
       }
     }

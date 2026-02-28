@@ -4,7 +4,7 @@ import XCTest
 final class NetworkServiceTests: XCTestCase {
   // MARK: - Properties
 
-  private var configuration: NetworkServiceImpl.Configuation!
+  private var configuration: NetworkServiceImpl.Configuration!
   private var mockSession: MockNetworkSession!
   private var mockInterceptorChain: MockNetworkInterceptorChain!
   private var mockNetworkMonitor: MockNetworkMonitor!
@@ -14,7 +14,7 @@ final class NetworkServiceTests: XCTestCase {
 
   override func setUp() {
     super.setUp()
-    self.configuration = NetworkServiceImpl.Configuation(
+    self.configuration = NetworkServiceImpl.Configuration(
       baseURL: URL(string: "https://api.example.com")!,
       timeoutInterval: 30,
       defaultHeaders: ["Content-Type": "application/json"]
@@ -61,7 +61,7 @@ final class NetworkServiceTests: XCTestCase {
     let target = TestTarget(path: "test")
     let response = TestResponse(id: 1, name: "Test")
     let data = try JSONEncoder().encode(response)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let _: TestResponse = try await sut.request(target)
@@ -75,7 +75,7 @@ final class NetworkServiceTests: XCTestCase {
     let target = TestTarget(method: .post)
     let response = TestResponse(id: 1, name: "Test")
     let data = try JSONEncoder().encode(response)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let _: TestResponse = try await sut.request(target)
@@ -89,7 +89,7 @@ final class NetworkServiceTests: XCTestCase {
     let target = TestTarget(headers: ["Custom": "Header"])
     let response = TestResponse(id: 1, name: "Test")
     let data = try JSONEncoder().encode(response)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let _: TestResponse = try await sut.request(target)
@@ -105,7 +105,7 @@ final class NetworkServiceTests: XCTestCase {
     let target = TestTarget(task: .requestParameters(parameters: parameters))
     let response = TestResponse(id: 1, name: "Test")
     let data = try JSONEncoder().encode(response)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let _: TestResponse = try await sut.request(target)
@@ -119,7 +119,7 @@ final class NetworkServiceTests: XCTestCase {
     let encodable = TestEncodable(id: 1, name: "Test")
     let target = TestTarget(task: .requestJSONEncodable(encodable))
     let data = try JSONEncoder().encode(encodable)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let _: TestResponse = try await sut.request(target)
@@ -137,7 +137,7 @@ final class NetworkServiceTests: XCTestCase {
     let target = TestTarget(task: .requestCompositeBody(parameters: parameters, body: bodyData))
     let encodable = TestEncodable(id: 1, name: "Test")
     let data = try JSONEncoder().encode(encodable)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let _: TestResponse = try await sut.request(target)
@@ -153,7 +153,7 @@ final class NetworkServiceTests: XCTestCase {
     // given
     let response = TestResponse(id: 1, name: "Test")
     let data = try JSONEncoder().encode(response)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let result: TestResponse = try await sut.request(TestTarget())
@@ -162,9 +162,9 @@ final class NetworkServiceTests: XCTestCase {
     XCTAssertEqual(result, response)
   }
 
-  func test_request_whenError_throwsNetworkError() async {
+  func test_request_whenError_throwsNetworkError() async throws {
     // given
-    self.mockSession.mockResponse = (Data(), HTTPURLResponse(url: self.configuration.baseURL, statusCode: 500, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (Data(), XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 500, httpVersion: nil, headerFields: nil)))
 
     // when
     do {
@@ -175,10 +175,10 @@ final class NetworkServiceTests: XCTestCase {
     }
   }
 
-  func test_request_whenDecodingFails_throwsDecodingError() async {
+  func test_request_whenDecodingFails_throwsDecodingError() async throws {
     // given
     let invalidData = "invalid".data(using: .utf8)!
-    self.mockSession.mockResponse = (invalidData, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (invalidData, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     do {
@@ -189,18 +189,22 @@ final class NetworkServiceTests: XCTestCase {
     }
   }
 
-  func test_request_whenError_throw404() async {
-    // give
-    self.mockSession.mockResponse = (Data(), HTTPURLResponse(url: self.configuration.baseURL, statusCode: 404, httpVersion: nil, headerFields: nil)!)
+  func test_request_whenError_throw404() async throws {
+    // given
+    self.mockSession.mockResponse = try (Data(), XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 404, httpVersion: nil, headerFields: nil)))
 
     // when and then
     do {
       let _: TestResponse = try await sut.request(TestTarget())
       XCTFail("Expected error to be thrown")
     } catch let error as NetworkError {
-      XCTAssertEqual(error, NetworkError.httpError(statusCode: 404, data: nil))
+      if case let .httpError(code, _) = error {
+        XCTAssertEqual(code, 404)
+      } else {
+        XCTFail("Expected httpError, got \(error)")
+      }
     } catch {
-      XCTAssertFalse(error is NetworkError)
+      XCTFail("Expected NetworkError, got \(error)")
     }
   }
 
@@ -211,7 +215,7 @@ final class NetworkServiceTests: XCTestCase {
     let target = TestTarget()
     let encodable = TestEncodable(id: 1, name: "Test")
     let data = try JSONEncoder().encode(encodable)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let _: TestResponse = try await sut.request(target)
@@ -224,7 +228,7 @@ final class NetworkServiceTests: XCTestCase {
     // given
     let response = TestResponse(id: 1, name: "Test")
     let data = try JSONEncoder().encode(response)
-    self.mockSession.mockResponse = (data, HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    self.mockSession.mockResponse = try (data, XCTUnwrap(HTTPURLResponse(url: self.configuration.baseURL, statusCode: 200, httpVersion: nil, headerFields: nil)))
 
     // when
     let _: TestResponse = try await sut.request(TestTarget())
